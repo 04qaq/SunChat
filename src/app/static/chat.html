@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sun 聊天</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; }
+    body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    #status { color: #666; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    #emotion { font-size: 0.95rem; margin-bottom: 1rem; padding: 0.5rem 0.75rem; background: #f4f4f5; border-radius: 6px; }
+    #log { white-space: pre-wrap; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; min-height: 200px; background: #fafafa; margin-bottom: 1rem; }
+    .user { color: #2563eb; }
+    .assistant { color: #15803d; }
+    .meta { color: #71717a; font-size: 0.85rem; }
+    #row { display: flex; gap: 0.5rem; }
+    #input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #ccc; }
+    button { padding: 0.5rem 1rem; border-radius: 6px; border: 0; background: #18181b; color: #fff; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>Sun 聊天</h1>
+  <p id="status">未连接</p>
+  <div id="emotion">情绪：—</div>
+  <div id="log"></div>
+  <div id="row">
+    <input id="input" type="text" placeholder="输入消息后按发送或回车" autocomplete="off" />
+    <button id="send" type="button" disabled>发送</button>
+  </div>
+
+  <script>
+    const logEl = document.getElementById("log");
+    const statusEl = document.getElementById("status");
+    const emotionEl = document.getElementById("emotion");
+    const inputEl = document.getElementById("input");
+    const sendBtn = document.getElementById("send");
+
+    const wsProto = location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = wsProto + "//" + location.host + "/ws";
+
+    let ws = null;
+    let sessionId = null;
+    let assistantLine = null;
+
+    function appendLine(className, text) {
+      const p = document.createElement("div");
+      p.className = className;
+      p.textContent = text;
+      logEl.appendChild(p);
+      logEl.scrollTop = logEl.scrollHeight;
+      return p;
+    }
+
+    function connect() {
+      ws = new WebSocket(wsUrl);
+      statusEl.textContent = "连接中…";
+
+      ws.onopen = () => {
+        statusEl.textContent = "已连接：" + wsUrl;
+        sendBtn.disabled = false;
+      };
+
+      ws.onclose = () => {
+        statusEl.textContent = "已断开，请刷新页面重连";
+        sendBtn.disabled = true;
+      };
+
+      ws.onerror = () => {
+        statusEl.textContent = "连接出错（请确认服务已启动）";
+      };
+
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        switch (msg.type) {
+          case "session":
+            sessionId = msg.session_id;
+            appendLine("meta", "[会话] " + sessionId);
+            break;
+          case "emotion":
+            emotionEl.textContent =
+              "情绪 E=" + (typeof msg.e === "number" ? msg.e.toFixed(3) : msg.e);
+            break;
+          case "token":
+            if (!assistantLine) {
+              assistantLine = appendLine("assistant", "");
+            }
+            assistantLine.textContent += msg.delta || "";
+            logEl.scrollTop = logEl.scrollHeight;
+            break;
+          case "done":
+            assistantLine = null;
+            appendLine("meta", "[本轮结束]");
+            break;
+          case "error":
+            appendLine("meta", "[错误] " + (msg.message || JSON.stringify(msg)));
+            assistantLine = null;
+            break;
+          default:
+            break;
+        }
+      };
+    }
+
+    function send() {
+      const text = inputEl.value.trim();
+      if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+      appendLine("user", "你：" + text);
+      assistantLine = null;
+      inputEl.value = "";
+      ws.send(JSON.stringify({ type: "chat", content: text }));
+    }
+
+    sendBtn.addEventListener("click", send);
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") send();
+    });
+
+    connect();
+  </script>
+</body>
+</html>

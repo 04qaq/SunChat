@@ -1,0 +1,16 @@
+[project]
+name = "sun"
+version = "0.1.0"
+description = "FastAPI WebSocket chat with streaming LLM, short-term memory, and emotion state"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.136.0",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.0.0",
+    "langgraph>=1.1.6",
+    "openai>=2.32.0",
+    "pydantic>=2.13.2",
+    "python-dotenv>=1.2.2",
+    "uvicorn[standard]>=0.44.0",
+]
