@@ -6,7 +6,7 @@
 
 - **流式回复**：SSE 解析后通过 WebSocket 逐段推送，前端实时展示。
 - **短期记忆**：按配置窗口保留最近若干轮 `user` / `assistant` 消息（可选文件持久化）。
-- **情绪状态**：根据情感分数更新内部情绪值 \(E_t\)，并注入系统提示影响语气；前端可展示情绪数值。
+- **心情指数**：每轮由评判模型结合 `character_traits.json` 与对话输出 valence，映射为 **0～100** 的 `mood_pct`，经 `mood_injection.txt` 注入主模型；前端展示心情指数与可选标签（无跨轮 EMA 累积）。
 
 ## 环境要求
 
@@ -37,7 +37,7 @@ uv sync
 uv run python run.py
 ```
 
-默认监听 **http://127.0.0.1:8000**。
+默认监听 **0.0.0.0:8000**（本机访问 **http://127.0.0.1:8000/**；可用环境变量 `HOST`、`PORT` 覆盖）。
 
 ### 4. 使用浏览器聊天
 
@@ -50,7 +50,7 @@ uv run python run.py
 连接：`ws://127.0.0.1:8000/ws`（可选查询参数 `session_id` 复用会话）。
 
 - 客户端发送：`{"type": "chat", "content": "用户消息"}`
-- 服务端推送：`session`（会话 id）、`emotion`（情绪）、`token`（增量文本）、`done`（本轮结束）
+- 服务端推送：`session`（会话 id）、`emotion`（`mood_pct`、`label` 等）、`token`（增量文本）、`done`（本轮结束）、`error`（可选）
 
 ## 项目结构（节选）
 
@@ -61,9 +61,19 @@ src/app/
   api/ws.py            # WebSocket 会话、记忆与情绪
   llm/client.py        # DeepSeek 流式调用
   memory/short_term.py # 短期记忆
-  emtion/              # 情感与情绪映射
+  emtion/              # 心情评判与注入
+  prompts/             # system_base、character_traits、judge、mood_injection
   static/chat.html     # 极简聊天前端
 ```
+
+## 文档
+
+| 文档 | 说明 |
+|------|------|
+| [doc/需求文档.md](doc/需求文档.md) | 产品需求与阶段范围 |
+| [doc/开发文档.md](doc/开发文档.md) | 实现结构与目录 |
+| [doc/第一阶段开发说明.md](doc/第一阶段开发说明.md) | 接口、配置与验收 |
+| [doc/learn/第一阶段基础知识.md](doc/learn/第一阶段基础知识.md) | 概念解析（与当前仓库行为一致，含心情评判与无 EMA 说明） |
 
 ## 许可证
 

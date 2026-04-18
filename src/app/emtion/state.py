@@ -1,21 +1,21 @@
-from app.config import settings
+from pathlib import Path
+
+_MOOD_INJECTION_PATH = Path(__file__).resolve().parent.parent / "prompts" / "mood_injection.txt"
 
 
-class EmotionState:
-    def __init__(self) -> None:
-        self.e: float = 0.0
-
-    def update(self, s_new: float) -> float:
-        gamma = settings.EMOTTION_GAMMA
-        self.e = self.e * gamma + s_new * (1.0 - gamma)
-        return self.e
-
-
-class EmotionMapper:
-    @staticmethod
-    def style_for_e(e: float) -> str:
-        if e > 0.5:
-            return "【情绪语境】你当前心情偏愉快；回答时语气可以轻快、乐于助人。"
-        if e < -0.5:
-            return "【情绪语境】你当前心情偏冷淡；回答可以简短、略带距离感。"
-        return "【情绪语境】你当前心情平和；保持自然、专业的语气。"
+def build_mood_prompt_injection(mood_pct: int, label: str | None) -> str:
+    """
+    将当前心情指数（0～100）与可选概要交给主模型，由模型结合人设自行演绎，
+    不再使用固定三档文案或 EMA 数值状态机。
+    """
+    mood_pct = max(0, min(100, int(mood_pct)))
+    template = _MOOD_INJECTION_PATH.read_text(encoding="utf-8")
+    if label and label.strip():
+        label_line = f"- 本轮心情概要：{label.strip()}\n"
+    else:
+        label_line = ""
+    return (
+        template.replace("{{MOOD_PCT}}", str(mood_pct))
+        .replace("{{LABEL_LINE}}", label_line)
+        .strip()
+    )

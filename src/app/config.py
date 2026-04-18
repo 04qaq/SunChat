@@ -15,7 +15,15 @@ class Settings(BaseSettings):
     )
 
     CHAT_WINDOW_SIZE: int = 15
-    EMOTTION_GAMMA: float = 0.7
+
+    # 心情：评判 LLM 输出 valence→映射为 0～100 心情指数；主模型结合人设与 mood_injection.txt 演绎（无 EMA）
+    MOOD_USE_LLM_JUDGE: bool = True
+    MOOD_JUDGE_MAX_MESSAGES: int = 12
+    MOOD_JUDGE_TIMEOUT_S: float = 45.0
+
+    # 每轮将情感变化、注入主模型的情绪语境与助手全文写入 MOOD_TRACE_DIR（JSONL）
+    MOOD_TRACE_ENABLED: bool = True
+    MOOD_TRACE_DIR: str = "data/mood_trace"
 
     # 勿在代码中写真实密钥；本地复制 .env.example 为 .env 后填写
     LLM_API_KEY: str = Field(

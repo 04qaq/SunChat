@@ -10,6 +10,35 @@ from app.models.message import Message
 
 class LLMClient:
 
+    async def complete_chat(
+        self,
+        messages: List[Message],
+        *,
+        temperature: float = 0.2,
+        timeout_s: float = 60.0,
+    ) -> str:
+        """非流式补全，用于心情评判等短 JSON 输出。"""
+        base = settings.LLM_BASE_URL.rstrip("/")
+        url = f"{base}/chat/completions"
+
+        payload = {
+            "model": settings.LLM_MODEL,
+            "messages": [{"role": m.role, "content": m.content} for m in messages],
+            "stream": False,
+            "temperature": temperature,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {settings.LLM_API_KEY}",
+            "Content-Type": "application/json",
+        }
+
+        async with httpx.AsyncClient(timeout=timeout_s) as client:
+            r = await client.post(url, json=payload, headers=headers)
+            r.raise_for_status()
+            data = r.json()
+            return (data["choices"][0]["message"].get("content") or "").strip()
+
     async def stream_chat(
         self,
         messages: List[Message],

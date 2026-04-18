@@ -36,8 +36,12 @@
     const inputEl = document.getElementById("input");
     const sendBtn = document.getElementById("send");
 
+    // 同页打开：用当前 host；file:// 打开时 location.host 为空，默认连本机 8000
+    // 可选：?ws_host=127.0.0.1:8000 或 ?ws_host=192.168.1.5:8000 指定后端
+    const qp = new URLSearchParams(location.search);
+    const wsHost = qp.get("ws_host") || location.host || "localhost:8000";
     const wsProto = location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = wsProto + "//" + location.host + "/ws";
+    const wsUrl = wsProto + "//" + wsHost + "/ws";
 
     let ws = null;
     let sessionId = null;
@@ -78,8 +82,16 @@
             appendLine("meta", "[会话] " + sessionId);
             break;
           case "emotion":
-            emotionEl.textContent =
-              "情绪 E=" + (typeof msg.e === "number" ? msg.e.toFixed(3) : msg.e);
+            {
+              const idx =
+                typeof msg.mood_pct === "number"
+                  ? msg.mood_pct
+                  : typeof msg.e === "number"
+                    ? Math.round((msg.e + 1) * 50)
+                    : "—";
+              const lab = msg.label ? " · " + msg.label : "";
+              emotionEl.textContent = "心情指数=" + idx + lab;
+            }
             break;
           case "token":
             if (!assistantLine) {
