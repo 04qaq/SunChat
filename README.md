@@ -64,15 +64,12 @@ src/app/
   memory/short_term.py # 短期记忆
   emtion/              # 心情评判与注入
   prompts/             # system_base、psychology_profile、judge、mood_injection、mbti_engine/
-  mbti_engine/         # 自研 MBTI foundations + personas 加载
+  mbti_engine/         # MBTI foundations + personas 加载
   psychology/          # 心理引擎加载与组装（可选保留 character_traits.json 作评判回退）
   static/chat.html     # 极简聊天前端
 ```
 
 ## 文档与配置说明
-
-- **本仓库不包含** `doc/`（需求、开发说明、架构笔记等仅在本地维护，不随 Git 分发）。
-- **密钥**：仅使用项目根目录 `.env`（从 `.env.example` 复制）；**切勿**提交 `.env` 或任何真实 API Key。
 - 代码入口与行为说明可直接阅读：`src/app/api/ws.py`（对话编排）、`src/app/config.py`（环境变量）、`src/app/prompts/`（人设与提示词）。
 
 ## 许可证
