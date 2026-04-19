@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sun 聊天</title>
+  <title>城崎诺亚 · Sun 聊天</title>
   <style>
     :root { font-family: system-ui, sans-serif; }
     body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
     #status { color: #666; font-size: 0.9rem; margin-bottom: 0.5rem; }
-    #emotion { font-size: 0.95rem; margin-bottom: 1rem; padding: 0.5rem 0.75rem; background: #f4f4f5; border-radius: 6px; }
+    #mbti, #emotion { font-size: 0.95rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: #f4f4f5; border-radius: 6px; }
+    #mbti { border-left: 3px solid #6366f1; }
+    #emotion { margin-bottom: 1rem; border-left: 3px solid #22c55e; }
     #log { white-space: pre-wrap; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; min-height: 200px; background: #fafafa; margin-bottom: 1rem; }
     .user { color: #2563eb; }
     .assistant { color: #15803d; }
@@ -22,7 +24,8 @@
 <body>
   <h1>Sun 聊天</h1>
   <p id="status">未连接</p>
-  <div id="emotion">情绪：—</div>
+  <div id="mbti">角色 MBTI：—</div>
+  <div id="emotion">心情指数：—</div>
   <div id="log"></div>
   <div id="row">
     <input id="input" type="text" placeholder="输入消息后按发送或回车" autocomplete="off" />
@@ -32,7 +35,14 @@
   <script>
     const logEl = document.getElementById("log");
     const statusEl = document.getElementById("status");
+    const mbtiEl = document.getElementById("mbti");
     const emotionEl = document.getElementById("emotion");
+
+    function formatMbtiSource(src) {
+      if (src === "fixed") return "配置锁定";
+      if (src === "inferred") return "会话推断";
+      return src || "—";
+    }
     const inputEl = document.getElementById("input");
     const sendBtn = document.getElementById("send");
 
@@ -68,6 +78,8 @@
       ws.onclose = () => {
         statusEl.textContent = "已断开，请刷新页面重连";
         sendBtn.disabled = true;
+        mbtiEl.textContent = "角色 MBTI：—";
+        emotionEl.textContent = "心情指数：—";
       };
 
       ws.onerror = () => {
@@ -79,6 +91,24 @@
         switch (msg.type) {
           case "session":
             sessionId = msg.session_id;
+            if (msg.psychology) {
+              const ph = msg.psychology;
+              let mbtiLine =
+                "角色 MBTI：" +
+                (ph.mbti || "—") +
+                " · 来源：" +
+                formatMbtiSource(ph.mbti_source);
+              if (ph.mission_primary) {
+                const mp = ph.mission_primary;
+                mbtiLine +=
+                  " · 主目标：" +
+                  mp.slice(0, 48) +
+                  (mp.length > 48 ? "…" : "");
+              }
+              mbtiEl.textContent = mbtiLine;
+            } else {
+              mbtiEl.textContent = "角色 MBTI：—";
+            }
             appendLine("meta", "[会话] " + sessionId);
             break;
           case "emotion":

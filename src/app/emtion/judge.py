@@ -12,8 +12,8 @@ from app.llm.client import LLMClient
 from app.models.message import Message
 
 _PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
-_TRAITS_PATH = _PROMPTS / "character_traits.json"
 _JUDGE_SYSTEM_PATH = _PROMPTS / "judge_system.txt"
+_FALLBACK_TRAITS_PATH = _PROMPTS / "character_traits.json"
 
 
 @dataclass
@@ -75,7 +75,10 @@ def _dialogue_block(history: List[Message], user_text: str) -> str:
 
 
 def load_character_traits_json() -> str:
-    return _TRAITS_PATH.read_text(encoding="utf-8")
+    """无心理引擎上下文时的回退（兼容旧 JSON）。"""
+    if _FALLBACK_TRAITS_PATH.is_file():
+        return _FALLBACK_TRAITS_PATH.read_text(encoding="utf-8")
+    return "{}"
 
 
 def load_judge_system_prompt() -> str:
@@ -86,12 +89,15 @@ async def compute_mood_signal(
     llm: LLMClient,
     history: List[Message],
     user_text: str,
+    *,
+    character_context_json: str | None = None,
 ) -> MoodJudgeResult:
     """
     调用评判模型得到 valence / confidence / label，映射为 mood_pct（0～100）。
     不使用历史 EMA；失败时 mood_pct=50。
+    character_context_json：心理引擎组装的 CHARACTER_JSON；为空则回退 character_traits.json。
     """
-    traits = load_character_traits_json()
+    traits = character_context_json or load_character_traits_json()
     dialogue = _dialogue_block(history, user_text)
     user_payload = (
         "## CHARACTER_JSON\n"

@@ -39,5 +39,16 @@ class Settings(BaseSettings):
 
     SESSION_STORAGE_MODEL: str = "short"
 
+    # 心理引擎：性格(OCEAN)+行为逻辑(MBTI)+目标与需要(Drives)，见 prompts/psychology_profile.yaml
+    PSYCHOLOGY_PROFILE_PATH: Path = _ROOT / "src" / "app" / "prompts" / "psychology_profile.yaml"
+    MBTI_INFER_TIMEOUT_S: float = 40.0
+
+    # 自研 MBTI 行为引擎目录（foundations.md + personas.yaml），非外部 skill 仓库
+    MBTI_ENGINE_ROOT: Path = _ROOT / "src" / "app" / "prompts" / "mbti_engine"
+    MBTI_FOUNDATIONS_INFER_MAX_CHARS: int = 4500
+    MBTI_MAIN_FOUNDATIONS_MAX_CHARS: int = 1200
+    MBTI_PERSONA_MAX_CHARS: int = 2800
+    MBTI_JUDGE_PERSONA_EXCERPT_CHARS: int = 420
+
 
 settings = Settings()

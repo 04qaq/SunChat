@@ -29,6 +29,9 @@ def append_chat_round_trace(
     assistant_reply: str,
     mood_label: Optional[str] = None,
     judge_used_llm: Optional[bool] = None,
+    mbti_type: Optional[str] = None,
+    mbti_source: Optional[str] = None,
+    mission_primary: Optional[str] = None,
 ) -> None:
     if not settings.MOOD_TRACE_ENABLED:
         return
@@ -46,6 +49,11 @@ def append_chat_round_trace(
         "mood_judge": {
             "label": mood_label,
             "used_llm": judge_used_llm,
+        },
+        "psychology": {
+            "mbti_type": mbti_type,
+            "mbti_source": mbti_source,
+            "mission_primary": mission_primary,
         },
         "prompt_injection": {
             "emotional_context": emotional_context,

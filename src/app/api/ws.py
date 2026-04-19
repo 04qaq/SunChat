@@ -13,6 +13,12 @@ from app.emtion.trace import append_chat_round_trace
 from app.llm.client import LLMClient
 from app.memory.short_term import ShortTermMemory
 from app.models.message import Message
+from app.psychology.assemble import (
+    build_psychology_system_message,
+    judge_character_context_json,
+)
+from app.psychology.loader import load_psychology_profile
+from app.psychology.mbti_infer import infer_mbti_once
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +36,34 @@ async def websocket_endpoint(ws: WebSocket) -> None:
     llm = LLMClient()
     chat_round = 0
 
-    await ws.send_json({"type": "session", "session_id": session_id})
+    profile = load_psychology_profile()
+    if profile.mbti.strategy == "infer_once":
+        mbti_type, cognitive_hint = await infer_mbti_once(llm, profile)
+        mbti_source = "inferred"
+    else:
+        mbti_type = (profile.mbti.type or "INFP").strip().upper()
+        cognitive_hint = (profile.mbti.notes or "").strip()
+        mbti_source = "fixed"
+
+    character_context_json = judge_character_context_json(
+        profile, mbti_type, cognitive_hint
+    )
+    psych_system = build_psychology_system_message(
+        profile, mbti_type, cognitive_hint
+    )
+
+    await ws.send_json(
+        {
+            "type": "session",
+            "session_id": session_id,
+            "psychology": {
+                "mbti": mbti_type,
+                "mbti_source": mbti_source,
+                "mission_primary": profile.drives.mission.primary,
+                "drives_schema_version": profile.drives.schema_version,
+            },
+        }
+    )
 
     try:
         while True:
@@ -66,7 +99,12 @@ async def websocket_endpoint(ws: WebSocket) -> None:
 
             try:
                 if settings.MOOD_USE_LLM_JUDGE:
-                    mood = await compute_mood_signal(llm, memory.get(), user_text)
+                    mood = await compute_mood_signal(
+                        llm,
+                        memory.get(),
+                        user_text,
+                        character_context_json=character_context_json,
+                    )
                     mood_pct = mood.mood_pct
                     mood_label = mood.label.strip() if mood.label else None
                     judge_used_llm = mood.used_llm
@@ -98,6 +136,7 @@ async def websocket_endpoint(ws: WebSocket) -> None:
                 memory.add(Message("user", user_text))
                 messages = [
                     Message("system", system_prompt),
+                    Message("system", psych_system),
                     Message("system", emo_style),
                 ] + memory.get()
 
@@ -120,6 +159,9 @@ async def websocket_endpoint(ws: WebSocket) -> None:
                     assistant_reply=reply,
                     mood_label=mood_label,
                     judge_used_llm=judge_used_llm,
+                    mbti_type=mbti_type,
+                    mbti_source=mbti_source,
+                    mission_primary=profile.drives.mission.primary,
                 )
 
                 await ws.send_json({"type": "done"})

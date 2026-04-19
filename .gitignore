@@ -15,3 +15,10 @@ wheels/
 
 # Runtime data (sessions, etc.)
 data/
+
+# Local documentation (not tracked; keep PRD/architecture on your machine only)
+doc/
+
+# LLM / vendor credentials beyond .env (if you add local key files)
+*.pem
+secrets/
