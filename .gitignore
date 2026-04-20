@@ -22,3 +22,7 @@ doc/
 # LLM / vendor credentials beyond .env (if you add local key files)
 *.pem
 secrets/
+
+# macOS metadata
+.DS_Store
+**/.DS_Store

@@ -6,4 +6,7 @@ from importlib.resources import files
 
 def read_prompt_text(*relative: str) -> str:
     """读取 ``sunchat.prompts`` 包内相对路径下的 UTF-8 文本。"""
-    return files("sunchat.prompts").joinpath(*relative).read_text(encoding="utf-8")
+    path = files("sunchat.prompts")
+    for part in relative:
+        path = path.joinpath(part)
+    return path.read_text(encoding="utf-8")
