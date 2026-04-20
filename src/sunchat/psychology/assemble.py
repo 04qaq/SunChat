@@ -1,15 +1,15 @@
-"""将心理画像组装为评判用 JSON 与主对话 system 补充段。"""
+﻿"""将心理画像组装为评判用 JSON 与主对话 system 补充段。"""
 from __future__ import annotations
 
 import json
 
-from app.config import settings
-from app.mbti_engine.content import (
+from sunchat.config import settings
+from sunchat.mbti_engine.content import (
     format_persona_for_judge,
     format_persona_for_main,
     optional_foundations_block_for_main,
 )
-from app.psychology.models import PsychologyProfileModel
+from sunchat.psychology.models import PsychologyProfileModel
 
 
 def judge_character_context_json(

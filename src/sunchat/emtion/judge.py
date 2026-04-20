@@ -1,19 +1,16 @@
-# app/emtion/judge.py
+﻿# app/emtion/judge.py
 from __future__ import annotations
 
 import json
 import re
 from dataclasses import dataclass
-from pathlib import Path
+from importlib.resources import files
 from typing import List
 
-from app.config import settings
-from app.llm.client import LLMClient
-from app.models.message import Message
-
-_PROMPTS = Path(__file__).resolve().parent.parent / "prompts"
-_JUDGE_SYSTEM_PATH = _PROMPTS / "judge_system.txt"
-_FALLBACK_TRAITS_PATH = _PROMPTS / "character_traits.json"
+from sunchat.config import settings
+from sunchat.llm.client import LLMClient
+from sunchat.models.message import Message
+from sunchat.prompt_resources import read_prompt_text
 
 
 @dataclass
@@ -76,13 +73,14 @@ def _dialogue_block(history: List[Message], user_text: str) -> str:
 
 def load_character_traits_json() -> str:
     """无心理引擎上下文时的回退（兼容旧 JSON）。"""
-    if _FALLBACK_TRAITS_PATH.is_file():
-        return _FALLBACK_TRAITS_PATH.read_text(encoding="utf-8")
+    path = files("sunchat").joinpath("prompts", "character_traits.json")
+    if path.is_file():
+        return path.read_text(encoding="utf-8")
     return "{}"
 
 
 def load_judge_system_prompt() -> str:
-    return _JUDGE_SYSTEM_PATH.read_text(encoding="utf-8")
+    return read_prompt_text("judge_system.txt")
 
 
 async def compute_mood_signal(

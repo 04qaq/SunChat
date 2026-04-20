@@ -1,4 +1,4 @@
-from app.mbti_engine.content import (
+﻿from sunchat.mbti_engine.content import (
     format_persona_for_judge,
     format_persona_for_main,
     load_foundations_excerpt,

@@ -1,11 +1,11 @@
-# app/llm/client.py
+﻿# app/llm/client.py
 import json
 from typing import List, AsyncGenerator
 
 import httpx
 
-from app.config import settings
-from app.models.message import Message
+from sunchat.config import settings
+from sunchat.models.message import Message
 
 
 class LLMClient:

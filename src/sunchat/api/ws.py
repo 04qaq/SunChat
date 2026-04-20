@@ -1,28 +1,26 @@
-# app/api/ws.py
+﻿# app/api/ws.py
 import logging
 import uuid
-from pathlib import Path
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect
 
-from app.config import settings
-from app.emtion.judge import compute_mood_signal
-from app.emtion.state import build_mood_prompt_injection
-from app.emtion.trace import append_chat_round_trace
-from app.llm.client import LLMClient
-from app.memory.short_term import ShortTermMemory
-from app.models.message import Message
-from app.psychology.assemble import (
+from sunchat.config import settings
+from sunchat.emtion.judge import compute_mood_signal
+from sunchat.emtion.state import build_mood_prompt_injection
+from sunchat.emtion.trace import append_chat_round_trace
+from sunchat.llm.client import LLMClient
+from sunchat.memory.short_term import ShortTermMemory
+from sunchat.models.message import Message
+from sunchat.psychology.assemble import (
     build_psychology_system_message,
     judge_character_context_json,
 )
-from app.psychology.loader import load_psychology_profile
-from app.psychology.mbti_infer import infer_mbti_once
+from sunchat.prompt_resources import read_prompt_text
+from sunchat.psychology.loader import load_psychology_profile
+from sunchat.psychology.mbti_infer import infer_mbti_once
 
 _logger = logging.getLogger(__name__)
-
-_PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "system_base.txt"
 
 
 async def websocket_endpoint(ws: WebSocket) -> None:
@@ -131,7 +129,7 @@ async def websocket_endpoint(ws: WebSocket) -> None:
                     emo_payload["label"] = mood_label
                 await ws.send_json(emo_payload)
 
-                system_prompt = _PROMPT_PATH.read_text(encoding="utf-8")
+                system_prompt = read_prompt_text("system_base.txt")
 
                 memory.add(Message("user", user_text))
                 messages = [

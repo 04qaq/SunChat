@@ -1,10 +1,10 @@
-import json
+﻿import json
 import os
 from dataclasses import asdict
 from typing import List
 
-from app.config import settings
-from app.models.message import Message
+from sunchat.config import settings
+from sunchat.models.message import Message
 
 
 class ShortTermMemory:

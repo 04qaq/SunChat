@@ -1,4 +1,4 @@
-"""会话启动时根据 OCEAN + 角色摘要 + foundations 节选推断 MBTI（infer_once 策略）。"""
+﻿"""会话启动时根据 OCEAN + 角色摘要 + foundations 节选推断 MBTI（infer_once 策略）。"""
 from __future__ import annotations
 
 import json
@@ -6,11 +6,11 @@ import logging
 import re
 from typing import Tuple
 
-from app.config import settings
-from app.llm.client import LLMClient
-from app.mbti_engine.content import load_foundations_excerpt
-from app.models.message import Message
-from app.psychology.models import PsychologyProfileModel
+from sunchat.config import settings
+from sunchat.llm.client import LLMClient
+from sunchat.mbti_engine.content import load_foundations_excerpt
+from sunchat.models.message import Message
+from sunchat.psychology.models import PsychologyProfileModel
 
 _logger = logging.getLogger(__name__)
 

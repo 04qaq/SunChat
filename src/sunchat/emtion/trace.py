@@ -1,4 +1,4 @@
-# app/emtion/trace.py
+﻿# app/emtion/trace.py
 """将每轮心情指数、评判元数据、注入主模型的文案与助手输出写入 JSONL。"""
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from app.config import settings
+from sunchat.config import settings
 
 
 def _trace_path(session_id: str) -> str:

@@ -1,23 +1,19 @@
-"""自研 MBTI 行为资源加载：foundations + personas.yaml，服务心情引擎。"""
+﻿"""自研 MBTI 行为资源加载：foundations + personas.yaml，服务心情引擎。"""
 from __future__ import annotations
 
-from pathlib import Path
+from importlib.resources import files
 from typing import Any
 
 import yaml
 
-from app.config import settings
+from sunchat.config import settings
 
 _PERSONAS_MAP: dict[str, Any] | None = None
 
 
-def _engine_root() -> Path:
-    return Path(settings.MBTI_ENGINE_ROOT)
-
-
 def load_foundations_excerpt(max_chars: int) -> str:
     """用于推断与（可选）主对话的认知基础节选。"""
-    path = _engine_root() / "foundations.md"
+    path = files("sunchat").joinpath("prompts", "mbti_engine", "foundations.md")
     text = path.read_text(encoding="utf-8")
     if max_chars <= 0 or len(text) <= max_chars:
         return text
@@ -27,7 +23,7 @@ def load_foundations_excerpt(max_chars: int) -> str:
 def _personas_map() -> dict[str, Any]:
     global _PERSONAS_MAP
     if _PERSONAS_MAP is None:
-        path = _engine_root() / "personas.yaml"
+        path = files("sunchat").joinpath("prompts", "mbti_engine", "personas.yaml")
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         _PERSONAS_MAP = {
             k.upper(): v for k, v in data.items() if isinstance(v, dict)

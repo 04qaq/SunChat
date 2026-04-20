@@ -1,6 +1,4 @@
-from pathlib import Path
-
-_MOOD_INJECTION_PATH = Path(__file__).resolve().parent.parent / "prompts" / "mood_injection.txt"
+﻿from sunchat.prompt_resources import read_prompt_text
 
 
 def build_mood_prompt_injection(mood_pct: int, label: str | None) -> str:
@@ -9,7 +7,7 @@ def build_mood_prompt_injection(mood_pct: int, label: str | None) -> str:
     不再使用固定三档文案或 EMA 数值状态机。
     """
     mood_pct = max(0, min(100, int(mood_pct)))
-    template = _MOOD_INJECTION_PATH.read_text(encoding="utf-8")
+    template = read_prompt_text("mood_injection.txt")
     if label and label.strip():
         label_line = f"- 本轮心情概要：{label.strip()}\n"
     else:

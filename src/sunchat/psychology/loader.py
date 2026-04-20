@@ -1,18 +1,16 @@
-from __future__ import annotations
-
-from pathlib import Path
+﻿from __future__ import annotations
 
 import yaml
 
-from app.config import settings
-from app.psychology.models import PsychologyProfileModel
+from sunchat.prompt_resources import read_prompt_text
+from sunchat.psychology.models import PsychologyProfileModel
 
 
 def load_psychology_profile() -> PsychologyProfileModel:
-    path = settings.PSYCHOLOGY_PROFILE_PATH
-    if not path.is_file():
-        raise FileNotFoundError(f"心理引擎配置不存在: {path}")
-    raw = path.read_text(encoding="utf-8")
+    try:
+        raw = read_prompt_text("psychology_profile.yaml")
+    except OSError as e:
+        raise FileNotFoundError("心理引擎配置不存在: prompts/psychology_profile.yaml") from e
     data = yaml.safe_load(raw) or {}
     profile = PsychologyProfileModel.model_validate(data)
     if profile.mbti.strategy == "fixed" and not (
