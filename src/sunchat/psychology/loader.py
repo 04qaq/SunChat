@@ -11,7 +11,7 @@ def load_psychology_profile() -> PsychologyProfileModel:
         raw = read_prompt_text("psychology_profile.yaml")
     except OSError as e:
         raise FileNotFoundError(
-            "心理引擎配置不存在: sunchat_prompts/psychology_profile.yaml"
+            "心理引擎配置不存在: sunchat/prompts/psychology_profile.yaml"
         ) from e
     data = yaml.safe_load(raw) or {}
     profile = PsychologyProfileModel.model_validate(data)

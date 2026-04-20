@@ -13,7 +13,7 @@ _PERSONAS_MAP: dict[str, Any] | None = None
 
 def load_foundations_excerpt(max_chars: int) -> str:
     """用于推断与（可选）主对话的认知基础节选。"""
-    path = files("sunchat_prompts").joinpath("mbti_engine", "foundations.md")
+    path = files("sunchat.prompts").joinpath("mbti_engine", "foundations.md")
     text = path.read_text(encoding="utf-8")
     if max_chars <= 0 or len(text) <= max_chars:
         return text
@@ -23,7 +23,7 @@ def load_foundations_excerpt(max_chars: int) -> str:
 def _personas_map() -> dict[str, Any]:
     global _PERSONAS_MAP
     if _PERSONAS_MAP is None:
-        path = files("sunchat_prompts").joinpath("mbti_engine", "personas.yaml")
+        path = files("sunchat.prompts").joinpath("mbti_engine", "personas.yaml")
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         _PERSONAS_MAP = {
             k.upper(): v for k, v in data.items() if isinstance(v, dict)
