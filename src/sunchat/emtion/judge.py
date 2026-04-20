@@ -73,7 +73,7 @@ def _dialogue_block(history: List[Message], user_text: str) -> str:
 
 def load_character_traits_json() -> str:
     """无心理引擎上下文时的回退（兼容旧 JSON）。"""
-    path = files("sunchat").joinpath("prompts", "character_traits.json")
+    path = files("sunchat_prompts").joinpath("character_traits.json")
     if path.is_file():
         return path.read_text(encoding="utf-8")
     return "{}"

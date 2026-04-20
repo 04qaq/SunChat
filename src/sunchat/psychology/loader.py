@@ -10,7 +10,9 @@ def load_psychology_profile() -> PsychologyProfileModel:
     try:
         raw = read_prompt_text("psychology_profile.yaml")
     except OSError as e:
-        raise FileNotFoundError("心理引擎配置不存在: prompts/psychology_profile.yaml") from e
+        raise FileNotFoundError(
+            "心理引擎配置不存在: sunchat_prompts/psychology_profile.yaml"
+        ) from e
     data = yaml.safe_load(raw) or {}
     profile = PsychologyProfileModel.model_validate(data)
     if profile.mbti.strategy == "fixed" and not (

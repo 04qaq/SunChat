@@ -1,23 +1,16 @@
-﻿# app/main.py
-from functools import lru_cache
-from importlib.resources import files
-
+﻿# sunchat/main.py
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
 
 from sunchat.api.ws import websocket_endpoint
+from sunchat.web_resources import read_chat_html
 
 app = FastAPI()
 
 
-@lru_cache(maxsize=1)
-def _chat_html() -> str:
-    return files("sunchat").joinpath("static", "chat.html").read_text(encoding="utf-8")
-
-
 @app.get("/")
 def chat_page():
-    return HTMLResponse(_chat_html())
+    return HTMLResponse(read_chat_html())
 
 
 @app.websocket("/ws")

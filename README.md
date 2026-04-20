@@ -6,7 +6,7 @@
 
 - **流式回复**：SSE 解析后通过 WebSocket 逐段推送，前端实时展示。
 - **短期记忆**：按配置窗口保留最近若干轮 `user` / `assistant` 消息（可选文件持久化）。
-- **心理引擎**：包内 `prompts/psychology_profile.yaml` 配置 **性格（OCEAN）**、**行为逻辑（MBTI `fixed` / `infer_once`）**、**目标与需要（drives）**；行为细则由自研 [`prompts/mbti_engine/`](src/sunchat/prompts/mbti_engine/)（`foundations.md` + `personas.yaml`）注入主对话与心情评判（评判侧为节选 JSON）；连接时推送 `psychology` 元数据。
+- **心理引擎**：独立资源包 [`sunchat_prompts`](src/sunchat_prompts/) 中 `psychology_profile.yaml` 配置 **性格（OCEAN）**、**行为逻辑（MBTI `fixed` / `infer_once`）**、**目标与需要（drives）**；行为细则由 [`sunchat_prompts/mbti_engine/`](src/sunchat_prompts/mbti_engine/)（`foundations.md` + `personas.yaml`）经 `importlib.resources` 注入主对话与心情评判（评判侧为节选 JSON）；连接时推送 `psychology` 元数据。
 - **心情指数**：每轮由评判模型结合上述 CHARACTER 上下文与对话输出 valence，映射为 **0～100** 的 `mood_pct`，经 `mood_injection.txt` 注入主模型（无跨轮 EMA 累积）。
 
 ## 环境要求
@@ -52,7 +52,7 @@ uv run sunchat
 uvx uvpacker build . -o path/to/output
 ```
 
-产出目录内运行 **`sunchat.exe`** 前，请在运行目录放置 **`.env`**，或设置 **`DOTENV_PATH`** 指向你的环境文件。静态页与 prompts 均通过包内资源加载，无需再依赖源码树中的 `src/` 路径。
+产出目录内运行 **`sunchat.exe`** 前，请在运行目录放置 **`.env`**，或设置 **`DOTENV_PATH`** 指向你的环境文件。`sunchat_static`（页面）与 `sunchat_prompts`（提示词等）均随发行包通过 `importlib.resources` 加载，无需源码树中的 `src/` 路径。
 
 ### 4. 使用浏览器聊天
 
@@ -75,20 +75,23 @@ pyproject.toml         # 依赖、uv_build 后端、脚本入口 sunchat（uvpac
 src/sunchat/
   __init__.py          # 包入口，导出 main（对应 sunchat = "sunchat:main"）
   __main__.py          # python -m sunchat
-  main.py              # FastAPI 路由与静态聊天页
+  main.py              # FastAPI 路由
+  web_resources.py     # 经 importlib.resources 读取 sunchat_static
+  prompt_resources.py  # 经 importlib.resources 读取 sunchat_prompts
   config.py            # 设置（python-dotenv + 环境变量）
   api/ws.py            # WebSocket 会话、记忆与情绪
   llm/client.py        # DeepSeek 流式调用
   memory/short_term.py # 短期记忆
   emtion/              # 心情评判与注入
-  prompts/             # system_base、psychology_profile、judge、mood_injection、mbti_engine/
-  mbti_engine/         # MBTI foundations + personas 加载
+  mbti_engine/         # MBTI foundations + personas 加载（Python）
   psychology/          # 心理引擎加载与组装（可选保留 character_traits.json 作评判回退）
-  static/chat.html     # 极简聊天前端
+src/sunchat_prompts/   # 仅非 Python 资源 + __init__.py（提示词、YAML、JSON 等）
+  mbti_engine/         # foundations.md、personas.yaml
+src/sunchat_static/    # 仅非 Python 资源 + __init__.py（如 chat.html）
 ```
 
 ## 文档与配置说明
-- 代码入口与行为说明可直接阅读：`src/sunchat/api/ws.py`（对话编排）、`src/sunchat/config.py`（环境变量）、`src/sunchat/prompts/`（人设与提示词）。
+- 代码入口与行为说明可直接阅读：`src/sunchat/api/ws.py`（对话编排）、`src/sunchat/config.py`（环境变量）、`src/sunchat_prompts/`（人设与提示词资源包）。
 
 ## 许可证
 
