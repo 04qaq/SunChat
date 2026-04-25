@@ -1,4 +1,4 @@
-﻿"""自研 MBTI 行为资源加载：foundations + personas.yaml，服务心情引擎。"""
+"""MBTI 行为资源：foundations.md + personas.yaml（随包分发）。"""
 from __future__ import annotations
 
 from importlib.resources import files
@@ -6,14 +6,17 @@ from typing import Any
 
 import yaml
 
-from sunchat.config import settings
+from characterengine.config import CharacterEngineConfig
 
 _PERSONAS_MAP: dict[str, Any] | None = None
 
 
+def _resource_root():
+    return files("characterengine.resources")
+
+
 def load_foundations_excerpt(max_chars: int) -> str:
-    """用于推断与（可选）主对话的认知基础节选。"""
-    path = files("sunchat.prompts").joinpath("mbti_engine").joinpath("foundations.md")
+    path = _resource_root().joinpath("mbti_engine").joinpath("foundations.md")
     text = path.read_text(encoding="utf-8")
     if max_chars <= 0 or len(text) <= max_chars:
         return text
@@ -23,7 +26,7 @@ def load_foundations_excerpt(max_chars: int) -> str:
 def _personas_map() -> dict[str, Any]:
     global _PERSONAS_MAP
     if _PERSONAS_MAP is None:
-        path = files("sunchat.prompts").joinpath("mbti_engine").joinpath("personas.yaml")
+        path = _resource_root().joinpath("mbti_engine").joinpath("personas.yaml")
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         _PERSONAS_MAP = {
             k.upper(): v for k, v in data.items() if isinstance(v, dict)
@@ -35,10 +38,12 @@ def get_persona(mbti: str) -> dict[str, Any]:
     return _personas_map().get(mbti.strip().upper(), {})
 
 
-def format_persona_for_main(mbti: str) -> str:
-    """主对话第二条 system 内嵌的完整型格块（受 MBTI_PERSONA_MAX_CHARS 限制）。"""
+def format_persona_for_main(
+    mbti: str, *, config: CharacterEngineConfig | None = None
+) -> str:
+    cfg = config or CharacterEngineConfig()
     p = get_persona(mbti)
-    lim = settings.MBTI_PERSONA_MAX_CHARS
+    lim = cfg.mbti_persona_max_chars
     if not p:
         return (
             f"## MBTI 行为规格 · {mbti.upper()}\n"
@@ -58,10 +63,12 @@ def format_persona_for_main(mbti: str) -> str:
     return text
 
 
-def format_persona_for_judge(mbti: str) -> str:
-    """心情评判 JSON 内嵌的短摘要，避免重复全文。"""
+def format_persona_for_judge(
+    mbti: str, *, config: CharacterEngineConfig | None = None
+) -> str:
+    cfg = config or CharacterEngineConfig()
     p = get_persona(mbti)
-    lim = settings.MBTI_JUDGE_PERSONA_EXCERPT_CHARS
+    lim = cfg.mbti_judge_persona_excerpt_chars
     if not p:
         return ""
     parts = [
@@ -75,7 +82,6 @@ def format_persona_for_judge(mbti: str) -> str:
 
 
 def optional_foundations_block_for_main(max_chars: int) -> str:
-    """主对话中可选追加的通用 foundations 节选（0 关闭）。"""
     if max_chars <= 0:
         return ""
     return (

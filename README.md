@@ -6,8 +6,8 @@
 
 - **流式回复**：SSE 解析后通过 WebSocket 逐段推送，前端实时展示。
 - **短期记忆**：按配置窗口保留最近若干轮 `user` / `assistant` 消息（可选文件持久化）。
-- **心理引擎**：资源位于 [`sunchat/prompts`](src/sunchat/prompts/) 中；`psychology_profile.yaml` 配置 **性格（OCEAN）**、**行为逻辑（MBTI `fixed` / `infer_once`）**、**目标与需要（drives）**。行为细则由 [`sunchat/prompts/mbti_engine/`](src/sunchat/prompts/mbti_engine/)（`foundations.md` + `personas.yaml`）经 `importlib.resources` 注入主对话与心情评判（评判侧为节选 JSON）；连接时推送 `psychology` 元数据。
-- **心情指数**：每轮由评判模型结合上述 CHARACTER 上下文与对话输出 valence，映射为 **0～100** 的 `mood_pct`，经 `mood_injection.txt` 注入主模型（无跨轮 EMA 累积）。
+- **心理引擎**：独立 Python 包 [`characterengine`](characterengine/)（可单独 `pip install -e ./characterengine` 发布）；应用侧在 [`sunchat/prompts/psychology_profile.yaml`](src/sunchat/prompts/psychology_profile.yaml) 配置 **OCEAN**、**MBTI（`fixed` / `infer_once`）**、**drives**。MBTI 资源（`foundations.md`、`personas.yaml`）随 `characterengine` 分发；连接时推送 `psychology` 元数据。
+- **心情与目标（动态层）**：每轮由评判模型结合 CHARACTER_JSON（含 Big Five 行为指令、`goals`、MBTI 节选等）输出 valence，映射为 **0～100** 的 `mood_pct`；与配置中的主/次目标、`horizon` 一并写入 **末条 user 消息** 末尾的 `<context><module name="character_state">...</module></context>` XML（无跨轮 EMA）。静态 system 中的心理引擎段含 **Big Five → 短行为指令**（不把原始小数写入主 prompt），并约定与 MBTI 冲突时以五维气质为准。
 
 ## 环境要求
 
@@ -46,6 +46,8 @@ uv run sunchat
 
 ### Windows 分发目录（uvpacker）
 
+应用依赖本地包 **`characterengine`**（见仓库根目录 `characterengine/`）。打包或发布到 PyPI 时，请同时将 `characterengine` 作为依赖安装（例如先发布 `characterengine`，再在 `sunchat` 的依赖里写版本约束），或与当前仓库一样使用 **可编辑路径依赖** 一并拷贝源码树。
+
 本项目 `pyproject.toml` 已满足 [uvpacker](https://github.com/touken928/uvpacker) 对目标项目的要求（`[build-system]`、`requires-python ==3.12.*`、`[project.scripts]` 入口 `sunchat`）。在任意装有 uv 的系统上可构建面向 **win_amd64** 的自包含目录：
 
 ```bash
@@ -70,7 +72,8 @@ uvx uvpacker build . -o path/to/output
 ## 项目结构（节选）
 
 ```text
-pyproject.toml         # 依赖、uv_build 后端、脚本入口 sunchat（uvpacker 兼容）
+pyproject.toml         # 依赖（含可编辑路径依赖 characterengine）、uv_build、sunchat 入口
+characterengine/       # 可单独开源的心理层包（src/characterengine + 自带 MBTI 资源）
 src/sunchat/
   __init__.py          # 包入口，导出 main（对应 sunchat = "sunchat:main"）
   __main__.py          # python -m sunchat
@@ -82,11 +85,9 @@ src/sunchat/
   llm/client.py        # DeepSeek 流式调用
   memory/short_term.py # 短期记忆
   emtion/              # 心情评判与注入
-  mbti_engine/         # MBTI foundations + personas 加载（Python）
-  psychology/          # 心理引擎加载与组装（可选保留 character_traits.json 作评判回退）
-  prompts/             # 仅非 Python 资源 + __init__.py（提示词、YAML、JSON 等）
-    mbti_engine/       # foundations.md、personas.yaml
-  static/              # 仅非 Python 资源 + __init__.py（如 chat.html）
+  psychology/          # 从 prompts 加载 YAML，再导出 characterengine API
+  prompts/             # system_base、judge、psychology_profile.yaml、character_traits.json 等
+  static/              # 如 chat.html
 ```
 
 ## 文档与配置说明

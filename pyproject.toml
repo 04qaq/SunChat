@@ -5,6 +5,7 @@ description = "FastAPI WebSocket chat with streaming LLM, short-term memory, and
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
+    "characterengine",
     "fastapi>=0.136.0",
     "httpx>=0.28.1",
     "pydantic-settings>=2.0.0",
@@ -15,6 +16,9 @@ dependencies = [
     "uvicorn[standard]>=0.44.0",
     "pyyaml>=6.0.3",
 ]
+
+[tool.uv.sources]
+characterengine = { path = "characterengine", editable = true }
 
 [project.scripts]
 sunchat = "sunchat:main"

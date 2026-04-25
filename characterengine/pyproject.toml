@@ -1,0 +1,35 @@
+[project]
+name = "characterengine"
+version = "0.1.0"
+description = "Portable character psychology layer: OCEAN, MBTI personas, drives, judge JSON, and dynamic context XML for LLM roleplay"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "SunChat contributors" }]
+keywords = ["llm", "roleplay", "mbti", "big-five", "character", "prompt"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "pydantic>=2.13.2",
+    "pyyaml>=6.0.3",
+]
+
+[project.urls]
+Repository = "https://github.com/04qaq/SunChat"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+characterengine = [
+    "resources/mbti_engine/foundations.md",
+    "resources/mbti_engine/personas.yaml",
+    "resources/psychology_profile.example.yaml",
+]

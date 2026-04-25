@@ -1,4 +1,4 @@
-# MBTI 行为基础（SunChat 心情引擎适配版）
+# MBTI 行为基础（Character Engine）
 
 ## 目的
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>城崎诺亚 · Sun 聊天</title>
+  <title>AIRI · Sun 聊天</title>
   <style>
     :root { font-family: system-ui, sans-serif; }
     body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
@@ -22,7 +22,7 @@
   </style>
 </head>
 <body>
-  <h1>Sun 聊天</h1>
+  <h1>AIRI · Sun 聊天</h1>
   <p id="status">未连接</p>
   <div id="mbti">角色 MBTI：—</div>
   <div id="emotion">心情指数：—</div>
@@ -56,6 +56,26 @@
     let ws = null;
     let sessionId = null;
     let assistantLine = null;
+    /** 当前轮助手流式原文（含 ACT / DELAY 等标签），展示前再剥离 */
+    let assistantRaw = "";
+
+    /**
+     * 去掉 <| ... |> 控制块（如 ACT、DELAY），只保留可读台词。
+     * 流式场景下若末尾出现未闭合的 `<|`，暂不展示该片段，避免闪烁出半个标签。
+     */
+    function stripControlTags(s) {
+      if (!s) return "";
+      let work = s;
+      const open = work.lastIndexOf("<|");
+      if (open !== -1) {
+        const tail = work.slice(open);
+        if (!tail.includes("|>")) work = work.slice(0, open);
+      }
+      return work
+        .replace(/<\|[\s\S]*?\|>/g, "")
+        .replace(/[ \t\f\v]{2,}/g, " ")
+        .trim();
+    }
 
     function appendLine(className, text) {
       const p = document.createElement("div");
@@ -126,17 +146,21 @@
           case "token":
             if (!assistantLine) {
               assistantLine = appendLine("assistant", "");
+              assistantRaw = "";
             }
-            assistantLine.textContent += msg.delta || "";
+            assistantRaw += msg.delta || "";
+            assistantLine.textContent = stripControlTags(assistantRaw);
             logEl.scrollTop = logEl.scrollHeight;
             break;
           case "done":
             assistantLine = null;
+            assistantRaw = "";
             appendLine("meta", "[本轮结束]");
             break;
           case "error":
             appendLine("meta", "[错误] " + (msg.message || JSON.stringify(msg)));
             assistantLine = null;
+            assistantRaw = "";
             break;
           default:
             break;
@@ -149,6 +173,7 @@
       if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
       appendLine("user", "你：" + text);
       assistantLine = null;
+      assistantRaw = "";
       inputEl.value = "";
       ws.send(JSON.stringify({ type: "chat", content: text }));
     }

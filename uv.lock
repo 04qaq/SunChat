@@ -43,6 +43,21 @@ wheels = [
 ]
 
 [[package]]
+name = "characterengine"
+version = "0.1.0"
+source = { editable = "characterengine" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.13.2" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+]
+
+[[package]]
 name = "charset-normalizer"
 version = "3.4.7"
 source = { registry = "https://pypi.org/simple" }
@@ -524,6 +539,7 @@ name = "sunchat"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "characterengine" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "langgraph" },
@@ -537,6 +553,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "characterengine", editable = "characterengine" },
     { name = "fastapi", specifier = ">=0.136.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "langgraph", specifier = ">=1.1.6" },

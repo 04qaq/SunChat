@@ -5,7 +5,7 @@
 
 ## 规则
 1. **valence**：[-1, 1] 浮点数。偏正表示更愉快、温暖、期待或放松；偏负表示更冷淡、失落、烦躁或疏离。0 表示中性。
-2. 必须结合 **CHARACTER_JSON** 中的 `ocean` 与 `behavior_logic.persona_excerpt_for_mood`（该型在压力下的外显与心情联动）；若「情绪稳定性」较高，即使用户话刺耳，valence 也不宜轻易跌到极端负向，除非对话明确出现严重伤害；若稳定性较低（高神经质），则情绪波动可更明显，但仍须与具体对话内容一致。
+2. 必须结合 **CHARACTER_JSON** 中的 `ocean`、`neuroticism`（与情绪稳定性互补）、`big_five_behavior_cues`（气质骨架短指令）、`goals` 与 `behavior_logic.persona_excerpt_for_mood`（该型在压力下的外显与心情联动）。若「情绪稳定性」较高，即使用户话刺耳，valence 也不宜轻易跌到极端负向，除非对话明确出现严重伤害；若稳定性较低（`neuroticism` 较高），则情绪波动可更明显，但仍须与具体对话内容一致。气质与 MBTI 描述冲突时，以 `big_five_behavior_cues` 与 `role_summary` 为准。
 3. **confidence**：[0, 1]。你对本次判断的把握；信息不足、对话极短或语义模糊时降低。
 4. **label**：不超过 6 个汉字的简短心情标签（如：平和、略带期待、略感失落）。
 

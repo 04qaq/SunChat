@@ -19,6 +19,12 @@ data/
 # Local documentation (not tracked; keep PRD/architecture on your machine only)
 doc/
 
+# Planning / design notes (not shipped to public remote)
+方案/
+
+# Editor settings (local)
+.vscode/
+
 # LLM / vendor credentials beyond .env (if you add local key files)
 *.pem
 secrets/
