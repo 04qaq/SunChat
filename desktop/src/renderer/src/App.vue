@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
+
+const route = useRoute()
 
 function minimize() {
   void window.desktop?.minimize()
@@ -10,25 +12,34 @@ function closeWin() {
 </script>
 
 <template>
-  <div
-    class="app-root flex flex-col h-full of-hidden bg-#0b0b12"
-    style="background: radial-gradient(120% 80% at 50% -20%, rgba(99, 102, 241, 0.18), transparent), #0b0b12"
-  >
-    <header
-      class="titlebar border-b border-white/6 flex h-9 shrink-0 items-center justify-between bg-black/30 px-2 pl-3 backdrop-blur-md"
-    >
-      <span
-        class="text-12px font-600 text-white/95 tracking-wider"
-        style="text-shadow: 0 0 20px rgba(99, 102, 241, 0.35)"
-        >SunChat</span
+  <!-- airi：Chat 为独立路由布局，无应用顶栏；主舞台保留 SunChat 顶栏 -->
+  <div class="app-root flex h-full flex-col overflow-hidden">
+    <template v-if="route.path !== '/chat'">
+      <header
+        class="titlebar flex h-9 shrink-0 items-center justify-between border-b border-neutral-800 px-2 pl-3"
       >
-      <div class="titlebar-actions -mr-0.5 flex gap-0.5">
-        <button type="button" class="tb-btn" @click="minimize">—</button>
-        <button type="button" class="tb-btn tb-close" @click="closeWin">×</button>
+        <span
+          class="text-12px text-neutral-100 font-600 tracking-wide"
+          style="text-shadow: 0 0 24px hsl(var(--chromatic-hue) 70% 55% / 0.35)"
+        >
+          SunChat
+        </span>
+        <div class="titlebar-actions -mr-0.5 flex gap-0.5">
+          <button type="button" class="tb-btn" @click="minimize">—</button>
+          <button type="button" class="tb-btn tb-close" @click="closeWin">×</button>
+        </div>
+      </header>
+    </template>
+    <main
+      class="main min-h-0 min-w-0 flex-1 overflow-hidden"
+      :class="route.path === '/chat' ? 'flex flex-col' : 'p-0'"
+    >
+      <div
+        class="h-full min-h-0 overflow-hidden"
+        :class="route.path === '/chat' ? '' : 'rd-2xl'"
+      >
+        <RouterView />
       </div>
-    </header>
-    <main class="main of-hidden flex-1 min-h-0 p-0">
-      <RouterView />
     </main>
   </div>
 </template>

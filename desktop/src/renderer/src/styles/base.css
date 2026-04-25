@@ -1,11 +1,13 @@
 :root {
-  --bg: #1a1a1e;
-  --bg-elevated: #222228;
-  --border: #3a3a44;
-  --text: #e8e8ed;
-  --text-muted: #9898a6;
-  --accent: #5b8cff;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+  /* airi `App.vue`：`--chromatic-hue` 与 presetChromatic baseHue 一致 */
+  --chromatic-hue: 220.44;
+  --bg: oklch(0.16 0.02 265);
+  --bg-elevated: oklch(0.2 0.022 265);
+  --border: rgba(163, 163, 163, 0.14);
+  --text: oklch(0.96 0.01 265);
+  --text-muted: oklch(0.72 0.02 265);
+  --accent: hsl(var(--chromatic-hue) 65% 58%);
+  --font-mono: ui-monospace, 'DM Mono', 'Cascadia Code', 'Segoe UI Mono', monospace;
 }
 
 * {
@@ -18,17 +20,27 @@ body,
   margin: 0;
 }
 body {
-  font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  /* airi `uno.config.ts` shared theme：sans 以 DM Sans 为先；无字体文件时回退系统栈 */
+  font-family:
+    'DM Sans',
+    'DM Sans Variable',
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
 }
 
-/* 仿 airi 无边框窗：顶栏可拖动；按钮不可拖 */
+/* 仿 airi 无边框窗：`pages/index.vue` 加载条等使用 `drag-region`；顶栏可拖动 */
 .app-root {
   display: flex;
   flex-direction: column;
   height: 100%;
+  /* airi `pages/index.vue` 舞台整体偏深 + 顶部轻色晕 */
+  background:
+    radial-gradient(120% 80% at 50% -15%, hsl(var(--chromatic-hue) 55% 45% / 0.14), transparent 55%),
+    oklch(0.14 0.018 265);
 }
 .titlebar {
   -webkit-app-region: drag;
@@ -38,8 +50,9 @@ body {
   justify-content: space-between;
   height: 36px;
   padding: 0 8px 0 12px;
-  background: #121214;
+  background: rgba(10, 10, 12, 0.72);
   border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
   user-select: none;
 }
 .title {
@@ -57,15 +70,18 @@ body {
   width: 36px;
   height: 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   background: transparent;
   color: var(--text-muted);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 .tb-btn:hover {
-  background: #2a2a32;
+  background: rgba(255, 255, 255, 0.06);
   color: var(--text);
 }
 .tb-close:hover {
@@ -75,6 +91,17 @@ body {
 .main {
   flex: 1;
   min-height: 0;
-  padding: 12px;
+  min-width: 0;
+  padding: 0;
   overflow: hidden;
+}
+
+/* airi `uno.config` rules：`drag-region` / 子控件 `no-drag` */
+.drag-region {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }

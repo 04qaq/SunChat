@@ -56,11 +56,11 @@
     let ws = null;
     let sessionId = null;
     let assistantLine = null;
-    /** 当前轮助手流式原文（含 ACT / DELAY 等标签），展示前再剥离 */
+    /** 当前轮助手流式原文；若模型仍输出遗留的 <|...|> 控制块，展示前剥离 */
     let assistantRaw = "";
 
     /**
-     * 去掉 <| ... |> 控制块（如 ACT、DELAY），只保留可读台词。
+     * 去掉 <| ... |> 控制块，只保留可读台词（兼容旧版提示词；新版提示词不要求此类标签）。
      * 流式场景下若末尾出现未闭合的 `<|`，暂不展示该片段，避免闪烁出半个标签。
      */
     function stripControlTags(s) {

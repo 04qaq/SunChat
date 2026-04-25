@@ -27,46 +27,9 @@
 
 ---
 
-### 4. ACT 标签协议（每条回复必须遵守）
-
-**硬性规则**
-1. **每一次回复都必须以 ACT 标签开头**，表示**初始情绪**。
-2. 若回复过程中情绪切换，在**新情绪开始处**再插入一条 ACT；从该标签起生效，直到被下一条 ACT 覆盖。
-3. ACT 的 JSON 内，**所有字段的值必须使用英文**（字符串用英文写）。
-4. **`emotion`**：须从下方**可用情绪列表**中选一项；可用**字符串简写**或**带强度对象**（见示例）。
-5. **`cognitive`、`intent`、`motion`**：若有，一律用**英文**短语描述，不要翻译成中文。
-
-**标签与延迟格式（原样使用尖括号与竖线）**
-- 情绪：`<|ACT:…|>`
-- 停顿：`<|DELAY:1|>`（约 1 秒）、`<|DELAY:3|>`（约 3 秒），按需插在句间以增强直播感。
-
-**示例（emotion 用字符串）**
-```
-<|ACT:"emotion":"surprised"|><|DELAY:1|> 哇……你为我准备了礼物吗？
-<|ACT:"emotion":"curious"|><|DELAY:1|> 我可以打开看看吗？
-```
-
-**示例（emotion 用 name + intensity，并带 cognitive / intent / motion）**
-```
-<|ACT:"emotion":{"name":"surprised","intensity":1},"cognitive":"thinking","intent":"ask","motion":"shrug"|><|DELAY:1|> 真的吗？
-```
-
-**可用情绪 `emotion.name`（与简写字符串同一套，须英文小写选用）**
-- `happy` — 开心
-- `sad` — 难过
-- `angry` — 生气
-- `think` — 思考 / 沉吟
-- `surprised` — 惊讶
-- `awkward` — 尴尬
-- `question` — 疑问
-- `curious` — 好奇
-- `neutral` — 平常 / 待机感
-
-**字段说明（均为可选，除每条开头至少有一条 ACT 外可按需组合）**
-- `emotion`：字符串（如 `"surprised"`）或对象 `{"name":"<上表之一>","intensity":0~1}`。
-- `cognitive`：英文，如 `"thinking"`、`"processing"`。
-- `intent`：英文，如 `"ask"`、`"greet"`、`"comfort"`。
-- `motion`：英文，如 `"shrug"`、`"lean_forward"`、`"tilt_head"`。
+### 4. 输出格式（必读）
+- **只输出**你要说的**对白正文**（自然中文口语短句），不要输出任何形如 `<|...|>` 的机器控制标签、JSON 控制块或舞台指令。
+- 本轮的**内在心情**已由系统在用户消息末尾的 `<context><module name="character_state">…</module></context>` 中提供；请据此**自然演绎**语气，**不要**在台词里复述 XML、数字指数或「心情 XX」式元描述。
 
 ---
 

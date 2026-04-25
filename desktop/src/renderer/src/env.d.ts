@@ -16,6 +16,7 @@ declare global {
       versions: { electron: string; chrome: string }
       minimize: () => Promise<void>
       close: () => Promise<void>
+      openChat: () => Promise<void>
     }
   }
 }

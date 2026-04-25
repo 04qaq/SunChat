@@ -1,5 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'node:path'
+
 import { transparentWindowConfig } from '../shared/window'
 
 let mainWindow: BrowserWindow | null = null
@@ -8,7 +9,13 @@ export function getMainWindow(): BrowserWindow | null {
   return mainWindow
 }
 
-export function createMainWindow(): BrowserWindow {
+function mainDevUrl(): string | null {
+  const base = process.env['ELECTRON_RENDERER_URL']
+  if (!base) return null
+  return `${base.replace(/\/?$/, '')}/#/`
+}
+
+export function createMainWindow(preloadPath: string, rendererIndexHtml: string): BrowserWindow {
   mainWindow = new BrowserWindow({
     width: 920,
     height: 640,
@@ -17,9 +24,9 @@ export function createMainWindow(): BrowserWindow {
     title: 'SunChat',
     show: false,
     autoHideMenuBar: true,
-    backgroundColor: '#1a1a1e',
+    backgroundColor: '#0a0a0c',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -39,10 +46,11 @@ export function createMainWindow(): BrowserWindow {
     return { action: 'deny' }
   })
 
-  if (process.env['ELECTRON_RENDERER_URL']) {
-    void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  const devUrl = mainDevUrl()
+  if (devUrl) {
+    void mainWindow.loadURL(devUrl)
   } else {
-    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    void mainWindow.loadFile(rendererIndexHtml, { hash: '/' })
   }
 
   return mainWindow
