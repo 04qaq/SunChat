@@ -1,0 +1,33 @@
+{
+  "name": "sunchat-desktop",
+  "version": "0.1.0",
+  "description": "SunChat Electron client (Vue; patterns informed by airi stage-tamagotchi, no AIRI packages)",
+  "type": "module",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "sync:assets": "node scripts/sync-live2d-assets.mjs && node scripts/sync-cubism-core.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pixi/unsafe-eval": "^7.4.2",
+    "@unocss/reset": "^66.6.8",
+    "pinia": "^2.2.6",
+    "pixi-live2d-display": "^0.5.0-beta",
+    "pixi.js": "^7.4.2",
+    "unocss": "^66.6.8",
+    "vue": "^3.5.13",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "electron": "^33.2.1",
+    "electron-vite": "^2.3.0",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
+  }
+}

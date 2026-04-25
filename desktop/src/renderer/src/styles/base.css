@@ -1,0 +1,80 @@
+:root {
+  --bg: #1a1a1e;
+  --bg-elevated: #222228;
+  --border: #3a3a44;
+  --text: #e8e8ed;
+  --text-muted: #9898a6;
+  --accent: #5b8cff;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* 仿 airi 无边框窗：顶栏可拖动；按钮不可拖 */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.titlebar {
+  -webkit-app-region: drag;
+  app-region: drag;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 8px 0 12px;
+  background: #121214;
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.titlebar-actions {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  display: flex;
+  gap: 2px;
+}
+.tb-btn {
+  width: 36px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tb-btn:hover {
+  background: #2a2a32;
+  color: var(--text);
+}
+.tb-close:hover {
+  background: #c42b2b;
+  color: #fff;
+}
+.main {
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+  overflow: hidden;
+}

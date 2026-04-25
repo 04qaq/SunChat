@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,7 +43,10 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "deepseek-chat"
     LLM_BASE_URL: str = "https://api.deepseek.com"
 
-    SEESION_STORAGE_PATH: str = "session_data"
+    SESSION_STORAGE_PATH: str = Field(
+        default="session_data",
+        validation_alias=AliasChoices("SESSION_STORAGE_PATH", "SEESION_STORAGE_PATH"),
+    )
     DATA_STORAGE_PATH: str = "data"
 
     SESSION_STORAGE_MODEL: str = "short"

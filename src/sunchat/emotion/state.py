@@ -1,4 +1,4 @@
-﻿from sunchat.prompt_resources import read_prompt_text
+from sunchat.prompt_resources import read_prompt_text
 
 
 def build_mood_prompt_injection(mood_pct: int, label: str | None) -> str:

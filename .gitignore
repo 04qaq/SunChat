@@ -1,5 +1,6 @@
 # Python-generated files
 __pycache__/
+.pytest_cache/
 *.py[oc]
 build/
 dist/
@@ -22,12 +23,19 @@ doc/
 # Planning / design notes (not shipped to public remote)
 方案/
 
+# Local-only: AIRI 参考仓或副本、设计文档（不推远端）
+airi/
+docs/
+
 # Editor settings (local)
 .vscode/
 
 # LLM / vendor credentials beyond .env (if you add local key files)
 *.pem
 secrets/
+
+# Live2D Cubism SDK 整包（本地解压；可再执行复制 Core → desktop public，见 desktop README）
+CubismSdkForWeb-*/
 
 # macOS metadata
 .DS_Store

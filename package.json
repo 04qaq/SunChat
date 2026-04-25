@@ -1,0 +1,9 @@
+{
+  "name": "sunchat-repo",
+  "private": true,
+  "description": "根目录占位：Python 主项目在 pyproject.toml；桌面端在 desktop/",
+  "scripts": {
+    "dev:desktop": "npm --prefix desktop run dev",
+    "test:desktop": "npm --prefix desktop test"
+  }
+}

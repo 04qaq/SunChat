@@ -14,6 +14,10 @@
 - Python **3.12.x**（`pyproject.toml` 中 `requires-python = "==3.12.*"`，与 [uvpacker](https://github.com/touken928/uvpacker) 等打包工具对齐）
 - 推荐使用 [**uv**](https://github.com/astral-sh/uv) 管理依赖
 
+## Live2D 桌面客户端（可选）
+
+仓库内 **[`desktop/`](desktop/)** 为 **Electron + electron-vite + Vue 3** 聊天窗（无边框可拖动顶栏，连接与后端相同的 WebSocket）。详见 [`desktop/README.md`](desktop/README.md)。**不要在仓库根目录直接执行 `npm run dev` 作为桌面依赖**；请先 **`cd desktop`** 安装依赖后 `npm run dev`，或在根目录执行 **`npm run dev:desktop`**。
+
 ## 快速开始
 
 ### 1. 克隆仓库
@@ -67,7 +71,9 @@ uvx uvpacker build . -o path/to/output
 连接：`ws://127.0.0.1:8000/ws`（可选查询参数 `session_id` 复用会话）。
 
 - 客户端发送：`{"type": "chat", "content": "用户消息"}`
-- 服务端推送：`session`（会话 id）、`emotion`（`mood_pct`、`label` 等）、`token`（增量文本）、`done`（本轮结束）、`error`（可选）
+- 服务端推送：`session`（含 **`protocol.version`**、会话 id、`psychology`）、`emotion`（`mood_pct`、`label` 等）、`token`（增量文本）、`done`（本轮结束）、`error`（可选）
+
+完整说明见 [`docs/WEBSOCKET_PROTOCOL.md`](docs/WEBSOCKET_PROTOCOL.md)。
 
 ## 项目结构（节选）
 
@@ -84,11 +90,24 @@ src/sunchat/
   api/ws.py            # WebSocket 会话、记忆与情绪
   llm/client.py        # DeepSeek 流式调用
   memory/short_term.py # 短期记忆
-  emtion/              # 心情评判与注入
+  emotion/             # 心情评判与策略（Llm/Static）
   psychology/          # 从 prompts 加载 YAML，再导出 characterengine API
   prompts/             # system_base、judge、psychology_profile.yaml、character_traits.json 等
   static/              # 如 chat.html
 ```
+
+## 测试
+
+```bash
+# Python（需 dev 依赖）
+uv sync --extra dev
+uv run pytest tests -q
+
+# 桌面端（Vitest）
+cd desktop && npm test
+```
+
+`tests/conftest.py` 会为 pytest 设置占位 `LLM_API_KEY` 等，**不会调用真实 LLM**。会话文件写入目录为 `tests/_test_session_data/`（已 gitignore）。
 
 ## 文档与配置说明
 - 代码入口与行为说明可直接阅读：`src/sunchat/api/ws.py`（对话编排）、`src/sunchat/config.py`（环境变量）、`src/sunchat/prompts/`（人设与提示词资源包）。

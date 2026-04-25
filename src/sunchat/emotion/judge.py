@@ -1,16 +1,18 @@
-﻿# app/emtion/judge.py
+# sunchat/emotion/judge.py
 from __future__ import annotations
 
 import json
+import logging
 import re
 from dataclasses import dataclass
 from importlib.resources import files
 from typing import List
 
-from sunchat.config import settings
-from sunchat.llm.client import LLMClient
+from sunchat.ports.llm import LlmCompletionsPort
 from sunchat.models.message import Message
 from sunchat.prompt_resources import read_prompt_text
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -61,9 +63,11 @@ def _parse_judge_payload(raw: str) -> tuple[float, float, str]:
     return valence, confidence, label
 
 
-def _dialogue_block(history: List[Message], user_text: str) -> str:
+def _dialogue_block(
+    history: List[Message], user_text: str, max_messages: int
+) -> str:
     lines: List[str] = []
-    tail = history[-settings.MOOD_JUDGE_MAX_MESSAGES :]
+    tail = history[-max_messages:]
     for m in tail:
         who = "用户" if m.role == "user" else "助手"
         lines.append(f"{who}: {m.content}")
@@ -84,19 +88,35 @@ def load_judge_system_prompt() -> str:
 
 
 async def compute_mood_signal(
-    llm: LLMClient,
+    llm: LlmCompletionsPort,
     history: List[Message],
     user_text: str,
     *,
     character_context_json: str | None = None,
+    max_dialogue_messages: int,
+    temperature: float,
+    timeout_s: float,
 ) -> MoodJudgeResult:
     """
     调用评判模型得到 valence / confidence / label，映射为 mood_pct（0～100）。
+
     不使用历史 EMA；失败时 mood_pct=50。
     character_context_json：心理引擎组装的 CHARACTER_JSON；为空则回退 character_traits.json。
+
+    Args:
+        llm: 补全端口实现。
+        history: 当前对话历史（不含本轮用户句则仍传入 user_text）。
+        user_text: 本轮用户纯文本。
+        character_context_json: 心理侧 CHARACTER JSON，可空。
+        max_dialogue_messages: 参与拼接的历史条数上限。
+        temperature: 评判用采样温度。
+        timeout_s: 非流式请求超时（秒）。
+
+    Returns:
+        :class:`MoodJudgeResult`：主链路使用 ``mood_pct``、``label`` 等字段。
     """
     traits = character_context_json or load_character_traits_json()
-    dialogue = _dialogue_block(history, user_text)
+    dialogue = _dialogue_block(history, user_text, max_dialogue_messages)
     user_payload = (
         "## CHARACTER_JSON\n"
         f"{traits}\n\n"
@@ -113,8 +133,8 @@ async def compute_mood_signal(
     try:
         raw = await llm.complete_chat(
             messages,
-            temperature=0.15,
-            timeout_s=settings.MOOD_JUDGE_TIMEOUT_S,
+            temperature=temperature,
+            timeout_s=timeout_s,
         )
         valence, confidence, label = _parse_judge_payload(raw)
         mood_pct = _valence_to_mood_pct(valence, confidence)
@@ -125,7 +145,8 @@ async def compute_mood_signal(
             valence=valence,
             confidence=confidence,
         )
-    except Exception:
+    except Exception as exc:
+        _logger.warning("心情评判失败，已回退为中性: %s", exc, exc_info=True)
         return MoodJudgeResult(
             mood_pct=50,
             label="（评判失败，已中性处理）",
